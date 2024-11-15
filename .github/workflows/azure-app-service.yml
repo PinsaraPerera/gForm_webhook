@@ -26,23 +26,27 @@ jobs:
       uses: azure/login@v2
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
-        
+
     - name: Log in to Azure Container Registry
       run: |
         az acr login --name ${{ secrets.AZURE_ACR_NAME }}
-
-    - name: Build and Push Docker Image
+        
+    - name: Build Docker Image
       run: |
-        $IMAGE=${{ secrets.AZURE_ACR_NAME }}.azurecr.io/fastapi-backend:latest
         docker build --build-arg MONGO_USER=${{ secrets.MONGO_USER }} \
                       --build-arg MONGO_PASSWORD=${{ secrets.MONGO_PASSWORD }} \
                       --build-arg MONGO_CLUSTER=${{ secrets.MONGO_CLUSTER }} \
-                      -t $IMAGE .
-        docker push $IMAGE
+                      -t $DOCKER_IMAGE_NAME:latest .
+        docker tag $DOCKER_IMAGE_NAME:latest ${{ secrets.AZURE_ACR_NAME }}.azurecr.io/$DOCKER_IMAGE_NAME:latest
+
+
+    - name: Push Docker Image to Azure Container Registry
+      run: |
+        docker push ${{ secrets.AZURE_ACR_NAME }}.azurecr.io/$DOCKER_IMAGE_NAME:latest
 
     - name: Deploy to Azure App Service
       uses: azure/webapps-deploy@v2
       with:
         app-name: ${{ secrets.AZURE_APP_NAME }}
         slot-name: production
-        images: ${{ secrets.AZURE_ACR_NAME }}.azurecr.io/fastapi-backend:latest
+        images: ${{ secrets.AZURE_ACR_NAME }}.azurecr.io/$DOCKER_IMAGE_NAME:latest
