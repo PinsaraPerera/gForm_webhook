@@ -1,0 +1,57 @@
+name: Deploy FastAPI to Azure App Service with Docker
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      DOCKER_IMAGE_NAME: fastapi-backend
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Create .env file
+      run: |
+        echo MONGO_USER = ${{ secrets.MONGO_USER }} >> .env
+        echo MONGO_PASSWORD = ${{ secrets.MONGO_PASSWORD }} >> .env
+        echo MONGO_CLUSTER = ${{ secrets.MONGO_CLUSTER }} >> .env
+
+    - name: Upload .env file
+      uses: actions/upload-artifact@v3
+      with:
+        name: env-file
+        path: .env
+
+    - name: Decode Publish Profile
+      run: echo "${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}" | base64 --decode > publish-profile.xml
+
+    - name: Log in to Azure
+      uses: azure/login@v1
+      with:
+        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+
+    - name: Build Docker Image
+      run: |
+        docker build -t $DOCKER_IMAGE_NAME:latest .
+        docker tag $DOCKER_IMAGE_NAME:latest ${{ secrets.AZURE_APP_NAME }}.azurecr.io/$DOCKER_IMAGE_NAME:latest
+
+    - name: Log in to Azure Container Registry
+      run: |
+        az acr login --name ${{ secrets.AZURE_APP_NAME }}
+
+    - name: Push Docker Image to Azure Container Registry
+      run: |
+        docker push ${{ secrets.AZURE_APP_NAME }}.azurecr.io/$DOCKER_IMAGE_NAME:latest
+
+    - name: Deploy to Azure App Service
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: ${{ secrets.AZURE_APP_NAME }}
+        slot-name: production
+        images: ${{ secrets.AZURE_APP_NAME }}.azurecr.io/$DOCKER_IMAGE_NAME:latest
