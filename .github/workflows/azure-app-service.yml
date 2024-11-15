@@ -22,9 +22,6 @@ jobs:
         echo MONGO_PASSWORD = ${{ secrets.MONGO_PASSWORD }} >> .env
         echo MONGO_CLUSTER = ${{ secrets.MONGO_CLUSTER }} >> .env
 
-    - name: Decode Publish Profile
-      run: echo "${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}" | base64 --decode > publish-profile.xml
-
     - name: Log in to Azure
       uses: azure/login@v1
       with:
