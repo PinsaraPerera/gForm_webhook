@@ -1,1 +1,1 @@
-# gForm_webhook
+[![Build and Deploy to Azure](https://github.com/PinsaraPerera/gForm_webhook/actions/workflows/azure-app-service.yml/badge.svg?branch=main)](https://github.com/PinsaraPerera/gForm_webhook/actions/workflows/azure-app-service.yml)
