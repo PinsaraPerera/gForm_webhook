@@ -8,7 +8,7 @@ on:
 env:
   IMAGE_NAME: fastapi-app
   ACR_NAME: pawan
-  CONTAINER_APP_NAME: fastapi-webhook
+  CONTAINER_APP_NAME: fastapi-test
   RESOURCE_GROUP: github
 
 
