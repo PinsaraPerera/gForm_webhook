@@ -40,4 +40,7 @@ jobs:
         IMAGE_TAG=${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
         az containerapp update --name ${{ env.CONTAINER_APP_NAME }} \
                                --resource-group ${{ env.RESOURCE_GROUP }} \
-                               --image $IMAGE_TAG
+                               --image $IMAGE_TAG \
+                               --environment-secrets MONGO_USER=${{ secrets.MONGO_USER }} \
+                               MONGO_PASSWORD=${{ secrets.MONGO_PASSWORD }} \
+                               MONGO_CLUSTER=${{ secrets.MONGO_CLUSTER }} \
