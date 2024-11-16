@@ -4,3 +4,4 @@
 __pycache__/
 secret.PublishSettings
 secret.json
+azure-app-service-test.yml
